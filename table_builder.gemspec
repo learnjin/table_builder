@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Petrik de Heus"]
-  s.date = %q{2010-06-29}
+  s.date = %q{2010-07-02}
   s.description = %q{Rails builder for creating tables and calendars inspired by ActionView's FormBuilder.}
   s.email = %q{}
   s.extra_rdoc_files = [
