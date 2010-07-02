@@ -3,6 +3,7 @@ require File.join(File.dirname(__FILE__), 'test_helper.rb')
 class CalendarHelperTest < Test::Unit::TestCase
   include ActionView::Helpers::TextHelper
   include ActionView::Helpers::TagHelper
+  include ActionView::Helpers::CaptureHelper
   include ActionController::TestCase::Assertions
   include CalendarHelper
   attr_accessor :output_buffer
@@ -14,8 +15,7 @@ class CalendarHelperTest < Test::Unit::TestCase
   
   def test_calendar_for
     self.output_buffer = ''
-    calendar_for(@events, :html => { :id => 'id', :style => 'style', :class => 'class'}) do |t|
-    end
+    calendar_for(@events, :html => { :id => 'id', :style => 'style', :class => 'class'}) { |t| }
     expected = %(<table id="id" style="style" class="class">) <<
       %(</table>)
     assert_dom_equal expected, output_buffer
@@ -55,6 +55,7 @@ class CalendarHelperTest < Test::Unit::TestCase
         output_buffer.concat("(#{day.day})#{content}")
       end
     end
+    
     expected = %(<table>) <<
       %(<tbody>) <<
         %(<tr><td class="notmonth">(30)</td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td class="weekend">(6)</td></tr>) <<
@@ -115,18 +116,18 @@ class CalendarHelperTest < Test::Unit::TestCase
   end
 
   def test_objects_for_days_with_events
-    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12)
-    objects_for_days = {}
-    Date.civil(2008, 11, 30).upto(Date.civil(2009, 1, 3)){|day| objects_for_days[day.strftime("%Y-%m-%d")] = [day, []]}
-    objects_for_days['2008-12-26'][1] = @events    
-    assert_equal objects_for_days, calendar.objects_for_days(@events, :date)
+    calendar         = CalendarHelper::Calendar.new :year=> 2008, :month => 12
+    
+    objects_for_days = (Date.civil(2008, 11, 30)..Date.civil(2009, 1, 3)).map do |day|
+      [day, Date.civil(2008, 12, 26) == day ? @events : []]
+    end
+    assert_equal objects_for_days, calendar.objects_for_days(@events, &:date)
   end
 
   def test_objects_for_days
-    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12)
-    objects_for_days = {}
-    Date.civil(2008, 11, 30).upto(Date.civil(2009, 1, 3)){|day| objects_for_days[day.strftime("%Y-%m-%d")] = [day, []]}
-    assert_equal objects_for_days, calendar.objects_for_days([], :date)
+    calendar = CalendarHelper::Calendar.new :year=> 2008, :month => 12
+    objects_for_days = (Date.civil(2008, 11, 30)..Date.civil(2009, 1, 3)).map { |day| [day, []] }
+    assert_equal objects_for_days, calendar.objects_for_days([], &:date)
   end
 
   def test_days
@@ -136,8 +137,8 @@ class CalendarHelperTest < Test::Unit::TestCase
     assert_equal days, calendar.days
   end
 
-  def test_days_with_first_day_of_week_set
-    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12, :first_day_of_week => 1)
+  def test_days_with_first_weekday_set
+    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12, :first_weekday => 1)
     days = []
     Date.civil(2008, 12, 1).upto(Date.civil(2009, 1, 4)){|day| days << day}
     assert_equal days, calendar.days
@@ -153,10 +154,11 @@ class CalendarHelperTest < Test::Unit::TestCase
     assert_equal Date.civil(2009, 1, 3), calendar.last_day
   end
   
-  def test_last_day_with_first_day_of_week_set
-    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12, :first_day_of_week => 1)
+  def test_last_day_with_first_weekday_set
+    calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12, :first_weekday => 1)
     assert_equal Date.civil(2009, 1, 4), calendar.last_day
   end  
 end
 
-class Event < Struct.new(:id, :name, :date); end
+class Event < Struct.new(:id, :name, :date)
+end
