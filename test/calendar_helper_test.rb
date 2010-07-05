@@ -8,6 +8,10 @@ class CalendarHelperTest < ActionView::TestCase
       Event.new(3, 'Jimmy Page', DateTime.civil(2008, 12, 26, 1)), # In case is an hour of that day
       Event.new(4, 'Robert Plant', Date.civil(2008, 12, 26))
     ]
+    @events2 = [
+      Event.new(3, 'Jimmy Page', [DateTime.civil(2008, 12, 26, 1), DateTime.civil(2008, 12, 27, 1)]), # In case is an hour of that day
+      Event.new(4, 'Robert Plant', Date.civil(2008, 12, 26))
+    ]
   end
 
   should 'raise error if called without array' do
@@ -22,12 +26,26 @@ class CalendarHelperTest < ActionView::TestCase
     end
     
     should 'return objects_for_days with days and events' do
-      calendar         = CalendarHelper::Calendar.new :year=> 2008, :month => 12
+      calendar         = CalendarHelper::Calendar.new :year => 2008, :month => 12
       objects_for_days = (Date.civil(2008, 11, 30)..Date.civil(2009, 1, 3)).map do |day|
         [day, Date.civil(2008, 12, 26) == day ? @events : []]
       end
       assert_equal objects_for_days, calendar.objects_for_days(@events, &:date)
     end
+    
+    should 'return objects_for_days with days and events when event has multiple dates' do
+      calendar         = CalendarHelper::Calendar.new :year => 2008, :month => 12
+      objects_for_days = (Date.civil(2008, 11, 30)..Date.civil(2009, 1, 3)).map do |day|
+        object =
+        case day
+        when DateTime.civil(2008, 12, 26, 1) then @events2
+        when DateTime.civil(2008, 12, 27, 1) then [@events2.first]
+        else [] end
+        [day, object]
+      end
+      assert_equal objects_for_days, calendar.objects_for_days(@events2, &:date)
+    end
+    
     
     should 'return objects_for_days with days accepting a block' do
       calendar         = CalendarHelper::Calendar.new :year=> 2008, :month => 12

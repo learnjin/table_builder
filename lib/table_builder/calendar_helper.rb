@@ -68,10 +68,15 @@ module CalendarHelper
     end
 
     def objects_for_days objects
-      objects = objects.group_by{ |o| yield(o).strftime "%Y-%m-%d" }
-      each_day do |day|
-        [day, objects[day.strftime("%Y-%m-%d")] || []]
+      grouped = {}
+      objects.each do |o|
+        [*yield(o)].each do |val|
+          key = val.strftime("%Y-%m-%d")
+          grouped.has_key?(key) ? grouped[key] << o : grouped[key] = [o]
+        end
       end
+            
+      each_day { |day| [day, grouped[day.strftime("%Y-%m-%d")] || []] }
     end
     
     def days
