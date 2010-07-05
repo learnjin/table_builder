@@ -1,7 +1,6 @@
 module CalendarHelper
 
   def calendar_for objects, options = {}
-    raise ArgumentError, "Missing block" unless block_given?
     html_options = options.delete(:html)
     builder      = options.delete(:builder)  || CalendarBuilder
     calendar     = options.delete(:calendar) || Calendar
@@ -20,15 +19,18 @@ module CalendarHelper
       day_method = options.delete(:day_method) || :date
       id_pattern = options.delete(:id)
       
-      tbody do
-        output = ""
+      tag(:tbody) do
+        output = ''
         @calendar.objects_for_days(@objects, &day_method).each_slice(7) do |week|
-          output += r do
-            week.map { |day, objects| d capture{yield day, objects}, td_options(day, objects, id_pattern) }.join
+          output = r do
+            week.map do |day, objects|
+              d capture{yield day, objects}, td_options(day, objects, id_pattern)
+            end
           end
         end
         output
       end
+      
     end
   
     def td_options day, objects, id_pattern
@@ -37,7 +39,7 @@ module CalendarHelper
       css << 'notmonth' if day.month != @calendar.month
       css << 'today'    if @today == day
       css << 'weekend'  if day.wday == 0 or day.wday == 6
-      css << 'empty'    if objects.empty?
+      # css << 'empty'    if objects.empty?
 
       options[:class] = css.join(' ')
       options[:id]    = day.strftime(id_pattern) if id_pattern
