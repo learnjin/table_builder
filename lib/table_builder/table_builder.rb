@@ -8,7 +8,7 @@ module TableHelper
 
   class TableBuilder
     def initialize objects, template, options
-      raise ArgumentError, "TableBuilder expects an Array but found a #{objects.class}" unless Array === objects
+      raise ArgumentError, "TableBuilder expects an Array or ActiveRecord::NamedScope::Scope but found a #{objects.class}" unless Array === objects or ActiveRecord::NamedScope::Scope === objects
       @objects, @template, @options = objects, template, options
     end
     
