@@ -44,7 +44,7 @@ module CalendarHelper
       options[:class] = css.join(' ')
       options[:id]    = day.strftime(id_pattern) if id_pattern
       
-      options.delete_if{ |k,v| v.blank?  }
+      options.delete_if{ |k,v| v.blank? }
       options
     end
     
@@ -64,12 +64,14 @@ module CalendarHelper
     end
     
     def each_day &block
-      (first_day..last_day).map(&block)
+      (first_day..last_day).map &block
     end
 
-    def objects_for_days objects, &day_method
-      objects = objects.group_by(&day_method)
-      each_day { |day| [day, objects[day] || []] }
+    def objects_for_days objects
+      objects = objects.group_by{ |o| yield(o).strftime "%Y-%m-%d" }
+      each_day do |day|
+        [day, objects[day.strftime("%Y-%m-%d")] || []]
+      end
     end
     
     def days

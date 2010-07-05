@@ -14,3 +14,10 @@ require "#{ File.dirname(__FILE__) }/../lib/table_builder"
 
 class Drummer < Struct.new(:id, :name); end
 class Event < Struct.new(:id, :name, :date); end
+
+# Stub!!
+module ActiveRecord
+  module NamedScope
+    class Scope < Array; end
+  end
+end

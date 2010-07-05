@@ -5,7 +5,7 @@ class CalendarHelperTest < ActionView::TestCase
 
   def setup
     @events = [
-      Event.new(3, 'Jimmy Page', Date.civil(2008, 12, 26)),
+      Event.new(3, 'Jimmy Page', DateTime.civil(2008, 12, 26, 1)), # In case is an hour of that day
       Event.new(4, 'Robert Plant', Date.civil(2008, 12, 26))
     ]
   end
@@ -27,6 +27,14 @@ class CalendarHelperTest < ActionView::TestCase
         [day, Date.civil(2008, 12, 26) == day ? @events : []]
       end
       assert_equal objects_for_days, calendar.objects_for_days(@events, &:date)
+    end
+    
+    should 'return objects_for_days with days accepting a block' do
+      calendar         = CalendarHelper::Calendar.new :year=> 2008, :month => 12
+      objects_for_days = (Date.civil(2008, 11, 30)..Date.civil(2009, 1, 3)).map do |day|
+        [day, Date.civil(2008, 12, 26) == day ? @events : []]
+      end
+      assert_equal objects_for_days, calendar.objects_for_days(@events){ |o| o.date  }
     end
 
     should 'map day range for calendar' do
@@ -53,7 +61,6 @@ class CalendarHelperTest < ActionView::TestCase
       calendar = CalendarHelper::Calendar.new(:year=> 2008, :month => 12, :first_weekday => 1)
       assert_equal Date.civil(2009, 1, 4), calendar.last_day
     end
-    
   end
   
   context 'ERB Rendering' do
