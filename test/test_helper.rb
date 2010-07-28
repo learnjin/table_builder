@@ -14,6 +14,7 @@ require "#{ File.dirname(__FILE__) }/../lib/table_builder"
 
 class Drummer < Struct.new(:id, :name); end
 class Event < Struct.new(:id, :name, :date); end
+Foo  = Struct.new(:id, :name, :row, :col)
 
 # Stub!!
 module ActiveRecord
